@@ -418,12 +418,12 @@
 					});
 					$(storySection).append(list);
 
-					var addButton = $("<ul><li class='toadd'>移动到这里</li></ul><span class='addtask'>+</span>")[0];
+					var addButton = $("<ul><li class='toadd'>移动到这里</li></ul><span class='addtask'>+</span>");
 					$(storySection).append(addButton);
 					$('body').append(storySection);
-
-					init();
 				});
+
+				init();
 			});
 			
         });
