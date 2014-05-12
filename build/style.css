@@ -1,0 +1,118 @@
+body {
+	background: #eeeeee;
+}
+
+div {
+	-webkit-box-sizing: border-box;
+	   -moz-box-sizing: border-box;
+			box-sizing: border-box;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:link {
+	color: white;
+}
+
+a:active {
+	color: white;
+}
+
+a:hover {
+	color: white;
+}
+
+a:visited {
+	color: white;
+}
+
+.container {
+	width: 960px;
+	margin: 0 auto;
+}
+
+div {
+	min-height: 20px;
+}
+
+.h_50 {
+	height: 50px;
+}
+
+.h_100 {
+	height: 100px;
+}
+
+.h_200 {
+	height: 200px;
+}
+
+.h_p_100 {
+	height: 100%;
+}
+
+.center {
+	align: center;
+}
+
+.nav {
+
+}
+
+.nav li {
+	float: left;
+	display: inline-block;
+	line-height: 2em;
+	padding: .5em 1em;
+	margin-right: .2em;
+}
+
+.nav li a {
+	color: #999999;
+	font: 2em Arial, Helvetica, sans-serif;
+}
+
+.nav li a:hover {
+	color: #00aced;
+	text-decoration: underline;
+}
+
+.l_menu {
+	position: fixed;
+	height: 500px;
+	text-align: center;
+	padding-top: 1em;
+}
+
+.r_content {
+	height: 400px;
+}
+
+.v_nav {
+	text-align: center;
+}
+
+.v_nav li {
+	line-height: 1em;
+	padding: .2em 1em;
+}
+
+.v_nav li a {
+	color: #999999;
+	font: 1em Arial, Helvetica, sans-serif;
+}
+
+.v_nav li a:hover {
+	color: #00aced;
+}
+
+.head_title {
+	font-size: 1.5em;
+}
+
+.p_fix {
+	position: fixed;
+}
+

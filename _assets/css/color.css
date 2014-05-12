@@ -1,0 +1,57 @@
+.white {
+	color: #ffffff;
+}
+
+.white {
+	background-color: white;
+}
+
+.red {
+	background-color: #ff0000;
+}
+
+.green {
+	background-color: #00ff00;
+}
+
+.blue {
+	background-color: #0000ff;
+}
+
+.grey {
+	background-color: #eeeeee;
+}
+
+.blackgrey {
+	background-color: #666666;
+}
+
+.twitter_blue {
+	background-color: #00aced;
+}
+
+.google_red {
+	background-color: #dd4b39;
+}
+
+.google_blue {
+	background-color: #3366cc;
+}
+
+/* body text */
+.google_body_text {
+	background-color: #999999;
+}
+
+/* title text */
+.google_title_text {
+	background-color: #333333;
+}
+
+.google_top_bar {
+	background-color: #f1f1f1;
+}
+
+.google_border {
+	background-color: #ebebeb;
+}

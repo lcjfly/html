@@ -1,0 +1,476 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>HTML5 boilerplates</title>
+        <link rel="stylesheet" type="text/css" href="../_assets/css/color.css">
+        <style>
+        	* {
+        		margin: 0;
+        		padding: 0;
+        	}
+
+        	body {
+        		font-family: "Tahoma";
+        		background-color: #225A7E;
+        	}
+
+        	header, section {
+				display: inline-block;
+			}
+
+        	header {
+        		width: 100%;
+        		height: 60px;
+        		display: block; 
+        		margin-bottom: 5px;
+        		color: #fff;
+        	}
+
+        	header #syncStatus {
+        		line-height: 60px;
+        		padding-left: 20px;
+        	}
+
+        	section {
+        		margin-left: 10px;
+        		margin-top: 10px;
+        		
+        	}
+
+			.story {
+				background-color: #ddd;
+				vertical-align: top;
+				
+			}
+			.story ul {
+				overflow: auto;
+				max-height: 500px;
+			}
+			.story span.title {
+				display: inline-block;
+				text-align: left;
+				padding: 5px;
+				line-height: 2em;
+				color: #333;
+			}
+			.story span.addtask {
+				width: 40px;
+				display: inline-block;
+				background-color: #ccc;
+				text-align: center;
+				margin: 5px;
+				line-height: 30px;
+			}
+			.story span.addtask:hover {
+				cursor: pointer;
+			}
+
+			.story li.toadd {
+				display: none;
+				list-style: none;
+				background: #F6F6F6;
+				color: #1C94C4;
+				margin: 5px;
+				padding: 5px;
+				height: 62px;
+				overflow: auto;
+				border: 1px dashed #333;
+			}
+
+			.list {
+				margin: auto;
+				padding: 0;
+				width: 310px;
+			}
+			.list li {
+				list-style: none;
+				background: #F6F6F6;
+				color: #1C94C4;
+				margin: 5px;
+				padding: 5px;
+				height: 62px;
+				overflow: auto;
+			}
+			.list li:hover {
+				cursor: move;
+			}
+			.list li .cancel:hover {
+				cursor: pointer;
+			}
+			.list li .save:hover {
+				cursor: pointer;
+			}
+			
+
+			.over {
+				border: 1px dashed #333333;
+			}
+
+			.space {
+				border: 1px dashed #333333;
+				height: 100px;
+				
+			}
+
+			.p_high {
+				border-left: 5px solid #dd4b39;
+			}
+
+			.p_middle {
+				border-left: 5px solid #ffd700;
+			}
+
+			.p_low {
+				border-left: 5px solid #32cd32;
+			}
+
+			.p_normal {
+
+			}
+
+			#trash {
+				display: inline-block;
+				vertical-align: center;
+			}
+
+			#trash img {
+				vertical-align: middle;
+			}
+
+			.searchResult {
+				border-bottom: 1px solid #32cd32;
+			}
+
+			#search, #cancelSearch, #save, #load {
+				cursor: pointer;
+			}
+
+        </style>
+        <script src="../_assets/js/jquery.js"></script>
+        <script type="text/javascript">
+        $(document).ready(function() {
+        	var dragSrcEl = null;
+        	var searchRsults = [];
+        	var data = [];
+
+        	function addEventListener(obj, eventName, eventHandler, b) {
+				obj.addEventListener(eventName, eventHandler, b);
+			}
+
+			function generateRandString(n) {
+				var x = "0123456789abcdefghijklmnopqrstuvwxyz";
+				var temp = "";
+				for(var i=0;i<n;i++) {
+					temp += x.charAt(Math.ceil(Math.random()*26));
+				}
+				return temp;
+			}
+
+        	function handleDragStart(e) {
+				this.style.opacity = '0.8';  // this / e.target is the source node.
+
+				dragSrcEl = this;
+
+  				e.dataTransfer.effectAllowed = 'move';
+  				e.dataTransfer.setData('text/html', this.innerHTML);
+  				e.dataTransfer.setData('id', this.id);
+  				e.dataTransfer.setData('sourceStoryId', $(this).parent().prev().html());
+			}
+
+			function handleDragOver(e) {
+				if (e.preventDefault) {
+					e.preventDefault(); // Necessary. Allows us to drop.
+				}
+
+				e.dataTransfer.dropEffect = 'move';  // See the section on the DataTransfer object.
+
+				return false;
+			}
+
+			function handleDragEnter(e) {
+				// this / e.target is the current hover target.
+				//this.classList.add('over');
+
+				// 留出空余空间
+				var space = document.createElement('li');
+				space.classList.add('space');
+				//$(space).insertBefore(e.target);
+
+			}
+
+			function handleDragLeave(e) {
+				this.classList.remove('over');  // this / e.target is previous target element.
+			}
+
+			function handleDragEnd(e) {
+				this.style.opacity = '1.0'; // this / e.target is previous target element.
+			}
+
+			function handleDrop(e) {
+				// this/e.target is current target element.
+
+  				if (e.stopPropagation) {
+    				e.stopPropagation(); // Stops some browsers from redirecting.
+  				}
+
+  				// Don't do anything if dropping the same column we're dragging.
+  				if (dragSrcEl != this) {
+    				// Set the source column's HTML to the HTML of the columnwe dropped on.
+    				dragSrcEl.innerHTML = this.innerHTML;
+    				dragSrcEl.style.opacity = '1.0';
+    				this.innerHTML = e.dataTransfer.getData('text/html');
+  				}
+
+  				return false;
+			}
+
+			function handleDbClick() {
+				var value = this.innerHTML;
+				this.innerHTML = "";
+
+				var editor = $('<div style="width:100%;"><textarea rows=2 cols=30 >'+value+'</textarea><span class="cancel">撤销</span><span class="save">保存</span>');
+				$(this).append(editor);
+				// cancel 
+				$('.cancel').click(function() {
+					$(this).closest('li').html(value);
+				});
+
+				// save
+				$('.save').click(function() {
+					// get edited value
+					var newValue = $(this).siblings('textarea').val();
+					$(this).closest('li').html(newValue);
+				});
+			}
+
+			function handleStoryTitleDragOver(e) {
+				if (e.preventDefault) {
+					e.preventDefault(); // Necessary. Allows us to drop.
+				}
+
+				e.dataTransfer.dropEffect = 'move';  // See the section on the DataTransfer object.
+
+				var sourceStoryId = e.dataTransfer.getData('sourceStoryId');
+				var targetStoryId = $(this).html();
+				if(sourceStoryId != targetStoryId) {
+					$(this).parent().find('li.toadd').show();
+				}
+
+				return false;
+			}
+
+			function handleStoryTitleDragLeave(e) {
+				$(this).parent().find('li.toadd').hide();
+			}
+
+			function handleStoryTitleDrop(e) {
+				// this/e.target is current target element.
+
+  				if (e.stopPropagation) {
+    				e.stopPropagation(); // Stops some browsers from redirecting.
+  				}
+
+  				// Don't do anything if dropping the same column we're dragging.
+  				if (dragSrcEl != this) {
+  					// delete old item
+    				var elementId = e.dataTransfer.getData('id');
+    				$('#'+elementId).remove();
+
+    				// Set the source column's HTML to the HTML of the columnwe dropped on.
+    				var newItem = $('<li draggable="true" id="'+elementId+'">'+e.dataTransfer.getData('text/html')+'</li>');
+    				$(this).parent().children('.list').append(newItem);
+    				$(this).parent().find('li.toadd').hide();
+
+    				addEventListener(newItem[0], 'dragstart', handleDragStart, false);
+    				addEventListener(newItem[0], 'dragenter', handleDragEnter, false);
+					addEventListener(newItem[0], 'dragover', handleDragOver, false);
+					addEventListener(newItem[0], 'dragleave', handleDragLeave, false);
+					addEventListener(newItem[0], 'dragend', handleDragEnd, false);
+					addEventListener(newItem[0], 'drop', handleDrop, false);
+					addEventListener(newItem[0], 'dblclick', handleDbClick, false);
+    				
+  				}
+
+  				return false;
+			}
+
+			
+			
+			function handleTrashDragOver(e) {
+				if (e.preventDefault) {
+					e.preventDefault(); // Necessary. Allows us to drop.
+				}
+
+				e.dataTransfer.dropEffect = 'move';  // See the section on the DataTransfer object.
+
+				$(this).children('img').attr('src', '../_assets/images/trash-full.png');
+
+				return false;
+			}
+
+			function handleTrashDragLeave(e) {
+				$(this).children('img').attr('src', '../_assets/images/trash-empty.png');
+			}
+
+
+			function handleTrashDrop(e) {
+				if (e.stopPropagation) {
+    				e.stopPropagation(); // Stops some browsers from redirecting.
+  				}
+
+  				// Don't do anything if dropping the same column we're dragging.
+  				if (dragSrcEl != this) {
+    				// Set the source column's HTML to the HTML of the columnwe dropped on.
+    				$(this).children('img').attr('src', '../_assets/images/trash-empty.png');
+    				var elementId = e.dataTransfer.getData('id');
+    				$('#'+elementId).remove();
+  				}
+
+  				return false;
+			}
+
+			
+
+			// search button
+			$('#search').click(function() {
+				var key = $('#key').val();
+				searchRsults = $('.list li:contains('+key+')');
+				searchRsults.addClass('searchResult');
+
+			});
+
+			$('#cancelSearch').click(function() {
+				$('#key').val('');
+				searchRsults.removeClass('searchResult');
+			});
+
+			// initial
+			function init() {
+				// story title event listener
+				var storieTitles = document.querySelectorAll('.story .title');
+				[].forEach.call(storieTitles, function(storyTitle) {
+					addEventListener(storyTitle, 'dragover', handleStoryTitleDragOver, false);
+					addEventListener(storyTitle, 'dragleave', handleStoryTitleDragLeave, false);
+					addEventListener(storyTitle, 'drop', handleStoryTitleDrop, false);
+				});
+
+				// task event listener
+				var tasks = document.querySelectorAll('ul.list li');
+				[].forEach.call(tasks, function(task) {
+					addEventListener(task, 'dragstart', handleDragStart, false);
+					addEventListener(task, 'dragenter', handleDragEnter, false);
+					addEventListener(task, 'dragover', handleDragOver, false);
+					addEventListener(task, 'dragleave', handleDragLeave, false);
+					addEventListener(task, 'dragend', handleDragEnd, false);
+					addEventListener(task, 'drop', handleDrop, false);
+					addEventListener(task, 'dblclick', handleDbClick, false);
+				});
+
+				// addtask button listener 
+				$('.story').on('click', '.addtask', function () {
+					var newTask = $('<li draggable="true" id="'+generateRandString(10)+'">新建项目</li>')[0];
+					$(this).prev().prev().append(newTask);
+					addEventListener(newTask, 'dragstart', handleDragStart, false);
+					addEventListener(newTask, 'dragenter', handleDragEnter, false);
+					addEventListener(newTask, 'dragover', handleDragOver, false);
+					addEventListener(newTask, 'dragleave', handleDragLeave, false);
+					addEventListener(newTask, 'dragend', handleDragEnd, false);
+					addEventListener(newTask, 'drop', handleDrop, false);
+					addEventListener(newTask, 'dblclick', handleDbClick, false);
+				});
+
+				// trash event
+				addEventListener($('#trash')[0], 'dragover', handleTrashDragOver, false);
+				addEventListener($('#trash')[0], 'dragleave', handleTrashDragLeave, false);
+				addEventListener($('#trash')[0], 'drop', handleTrashDrop, false);
+			}
+
+			init();
+
+			$('#save').click(function() {
+				var stories = $('.story');
+				[].forEach.call(stories, function(story) {
+					var storyData = {};
+					storyData.title = $(story).find('.title').html();
+					storyData.content = [];
+					var tasks = $(story).find('ul.list li');
+					[].forEach.call(tasks, function(task) {
+						var taskData = {};
+						taskData.id = $(task).attr('id');
+						taskData.content = $(task).html();
+						storyData.content.push(taskData);
+					});
+					data.push(storyData);
+				});
+
+				localStorage.data = JSON.stringify(data);
+			});
+
+			$('#load').click(function() {
+				stories = JSON.parse(localStorage.data);
+				[].forEach.call(stories, function(story) {
+					var storySection = $("<section class='story' draggable='true'><span class='title'>"+story.title+"</span></section>")[0];
+					var list = $("<ul class='list'></ul>")[0];
+					[].forEach.call(story.content, function(task) {
+						var taskList = $("<li draggable='true' id='"+task.id+"'>"+task.content+"</li>")[0];
+						$(list).append(taskList);
+					});
+					$(storySection).append(list);
+
+					var addButton = $("<ul><li class='toadd'>移动到这里</li></ul><span class='addtask'>+</span>")[0];
+					$(storySection).append(addButton);
+					$('body').append(storySection);
+
+					init();
+				});
+			});
+			
+        });
+        </script>
+    </head>
+    <body>
+    	<header>
+    		<span id="syncStatus">同步状态: 离线</span>&nbsp;&nbsp;&nbsp;<input id="key" placeholder="输入关键字" /><span id="search">搜索</span>|<span id="cancelSearch">取消搜索</span>
+    		<div id="trash" draggable="true"><img src="../_assets/images/trash-empty.png" width="40px">回收站</div>&nbsp;&nbsp;&nbsp;
+    		<span id="save">保存到本地</span>&nbsp;&nbsp;&nbsp;
+    		<span id="load">载入本地数据</span>
+    	</header>
+    	<!--
+    	<section class="story" draggable="true">
+    		<span class="title">想要做</span>
+			<ul class="list">
+				<li draggable="true" class="p_high" id="colorSelector">颜色选择器</li>
+				<li draggable="true" class="p_middle" id="search">搜索任务</li>
+				<li draggable="true" id="editMenu">编辑菜单优化</li>
+				<li draggable="true" id="importData">导入外部文件</li>
+				<li draggable="true" id="sync">同步</li>
+			</ul>
+			<ul>
+				<li class="toadd">移动到这里</li>
+			</ul>
+			<span class="addtask">+</span>
+    	</section>
+    	<section class="story" draggable="true">
+    		<span class="title">正在做</span>
+			<ul class="list">
+				<li draggable="true" id="delete">删除任务</li>
+			</ul>
+			<ul>
+				<li class="toadd">移动到这里</li>
+			</ul>
+			<span class="addtask">+</span>
+    	</section>
+    	<section class="story" draggable="true">
+    		<span class="title">已完成</span>
+			<ul class="list">
+				<li draggable="true" id="list">列表功能</li>
+			</ul>
+			<ul>
+				<li class="toadd">移动到这里</li>
+			</ul>
+			<span class="addtask">+</span>
+    	</section>
+    	-->
+    </body>
+</html>

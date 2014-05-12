@@ -1,0 +1,23 @@
+.card {
+	padding: 2em;
+	background-color: #ffffff;
+	-webkit-box-shadow: 0 0 5px 3px #cccccc;
+	   -moz-box-shadow: 0 0 5px 3px #cccccc;
+	   	    box-shadow: 0 0 5px 3px #cccccc;
+}
+
+.card a.title {
+	display: block;
+	font: bold 2em Arial, Helvetica, sans-serif;
+	padding-bottom: .5em;
+	color: #333333;
+}
+
+.card a.title:hover {
+	text-decoration: underline;
+}
+
+.card p.content {
+	color: #999999;
+	font: 1em Arial, Helvetica, sans-serif;
+}
