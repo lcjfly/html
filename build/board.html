@@ -408,6 +408,10 @@
 			});
 
 			$('#load').click(function() {
+				[].forEach.call($('.story'), function(story) {
+					$(story).remove();
+				});
+				
 				stories = JSON.parse(localStorage.data);
 				[].forEach.call(stories, function(story) {
 					var storySection = $("<section class='story' draggable='true'><span class='title'>"+story.title+"</span></section>")[0];
