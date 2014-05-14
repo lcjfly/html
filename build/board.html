@@ -3,7 +3,8 @@
     <head>
         <meta charset="utf-8" />
         <title>HTML5 boilerplates</title>
-        <link rel="stylesheet" type="text/css" href="../_assets/css/color.css">
+        <link rel="stylesheet" type="text/css" href="../_assets/css/reset.css">
+        <link rel="stylesheet" type="text/css" href="../_assets/css/r_grid_12.css">
         <style>
         	* {
         		margin: 0;
@@ -13,23 +14,21 @@
         	body {
         		font-family: "Tahoma";
         		background-color: #225A7E;
+        		max-width: 100%;
         	}
 
-        	header, section {
+        	section {
 				display: inline-block;
 			}
 
-        	header {
-        		width: 100%;
-        		height: 60px;
-        		display: block; 
-        		margin-bottom: 5px;
-        		color: #fff;
-        	}
-
-        	header #syncStatus {
+        	#syncStatus {
         		line-height: 60px;
         		padding-left: 20px;
+        	}
+
+        	#storyboard {
+        		border: 1px dashed #000; 
+        		overflow-x: scroll;
         	}
 
         	section {
@@ -81,7 +80,7 @@
 			.list {
 				margin: auto;
 				padding: 0;
-				width: 310px;
+				width: 300px;
 			}
 			.list li {
 				list-style: none;
@@ -146,6 +145,12 @@
 				cursor: pointer;
 			}
 
+			#log {
+				background-color: #fff;
+				height: 100%;
+				min-height: 500px;
+			}
+
         </style>
         <script src="../_assets/js/jquery.js"></script>
         <script type="text/javascript">
@@ -153,6 +158,7 @@
         	var dragSrcEl = null;
         	var searchRsults = [];
         	var data = [];
+
 
         	function addEventListener(obj, eventName, eventHandler, b) {
 				obj.addEventListener(eventName, eventHandler, b);
@@ -175,7 +181,7 @@
   				e.dataTransfer.effectAllowed = 'move';
   				e.dataTransfer.setData('text/html', this.innerHTML);
   				e.dataTransfer.setData('id', this.id);
-  				e.dataTransfer.setData('sourceStoryId', $(this).parent().prev().html());
+  				e.dataTransfer.setData('sourceStoryId', $(this).parent().parent().attr('id'));
 			}
 
 			function handleDragOver(e) {
@@ -252,7 +258,7 @@
 				e.dataTransfer.dropEffect = 'move';  // See the section on the DataTransfer object.
 
 				var sourceStoryId = e.dataTransfer.getData('sourceStoryId');
-				var targetStoryId = $(this).html();
+				var targetStoryId = $(this).parent().attr('id');
 				if(sourceStoryId != targetStoryId) {
 					$(this).parent().find('li.toadd').show();
 				}
@@ -289,6 +295,10 @@
 					addEventListener(newItem[0], 'dragend', handleDragEnd, false);
 					addEventListener(newItem[0], 'drop', handleDrop, false);
 					addEventListener(newItem[0], 'dblclick', handleDbClick, false);
+
+					// log
+					var storyTitle = $('#'+e.dataTransfer.getData('sourceStoryId')).find('.title').html();
+    				addLog('['+$('#'+elementId).html()+']任务从['+storyTitle+']移动到['+$(this).html()+']');
     				
   				}
 
@@ -324,13 +334,21 @@
     				// Set the source column's HTML to the HTML of the columnwe dropped on.
     				$(this).children('img').attr('src', '../_assets/images/trash-empty.png');
     				var elementId = e.dataTransfer.getData('id');
+
+    				// log
+    				addLog('['+$('#'+elementId).html()+']任务被删除');
+
     				$('#'+elementId).remove();
   				}
 
   				return false;
 			}
 
-			
+			// add log
+			function addLog(str) {
+				var newLog = $('<p>'+str+'</p>');
+				$('#log').append(newLog);
+			}
 
 			// search button
 			$('#search').click(function() {
@@ -369,7 +387,8 @@
 
 				// addtask button listener 
 				$('.story').on('click', '.addtask', function () {
-					var newTask = $('<li draggable="true" id="'+generateRandString(10)+'">新建项目</li>')[0];
+					var newTaskName = '新建项目';
+					var newTask = $('<li draggable="true" id="'+generateRandString(10)+'">'+newTaskName+'</li>')[0];
 					$(this).prev().prev().append(newTask);
 					addEventListener(newTask, 'dragstart', handleDragStart, false);
 					addEventListener(newTask, 'dragenter', handleDragEnter, false);
@@ -378,6 +397,10 @@
 					addEventListener(newTask, 'dragend', handleDragEnd, false);
 					addEventListener(newTask, 'drop', handleDrop, false);
 					addEventListener(newTask, 'dblclick', handleDbClick, false);
+
+					// log
+					var storyTitle = $(this).parent().find('.title').html();
+					addLog('添加新任务['+newTaskName+']到['+storyTitle+']');
 				});
 
 				// trash event
@@ -392,6 +415,7 @@
 				var stories = $('.story');
 				[].forEach.call(stories, function(story) {
 					var storyData = {};
+					storyData.id = $(story).attr('id');
 					storyData.title = $(story).find('.title').html();
 					storyData.content = [];
 					var tasks = $(story).find('ul.list li');
@@ -414,7 +438,7 @@
 				
 				stories = JSON.parse(localStorage.data);
 				[].forEach.call(stories, function(story) {
-					var storySection = $("<section class='story' draggable='true'><span class='title'>"+story.title+"</span></section>")[0];
+					var storySection = $("<section id='"+story.id+"' class='story' draggable='true'><span class='title'>"+story.title+"</span></section>")[0];
 					var list = $("<ul class='list'></ul>")[0];
 					[].forEach.call(story.content, function(task) {
 						var taskList = $("<li draggable='true' id='"+task.id+"'>"+task.content+"</li>")[0];
@@ -424,7 +448,7 @@
 
 					var addButton = $("<ul><li class='toadd'>移动到这里</li></ul><span class='addtask'>+</span>");
 					$(storySection).append(addButton);
-					$('body').append(storySection);
+					$('#storyboard').append(storySection);
 				});
 
 				init();
@@ -434,47 +458,90 @@
         </script>
     </head>
     <body>
-    	<header>
-    		<span id="syncStatus">同步状态: 离线</span>&nbsp;&nbsp;&nbsp;<input id="key" placeholder="输入关键字" /><span id="search">搜索</span>|<span id="cancelSearch">取消搜索</span>
-    		<div id="trash" draggable="true"><img src="../_assets/images/trash-empty.png" width="40px">回收站</div>&nbsp;&nbsp;&nbsp;
-    		<span id="save">保存到本地</span>&nbsp;&nbsp;&nbsp;
-    		<span id="load">载入本地数据</span>
-    	</header>
-    	<!--
-    	<section class="story" draggable="true">
-    		<span class="title">想要做</span>
-			<ul class="list">
-				<li draggable="true" class="p_high" id="colorSelector">颜色选择器</li>
-				<li draggable="true" class="p_middle" id="search">搜索任务</li>
-				<li draggable="true" id="editMenu">编辑菜单优化</li>
-				<li draggable="true" id="importData">导入外部文件</li>
-				<li draggable="true" id="sync">同步</li>
-			</ul>
-			<ul>
-				<li class="toadd">移动到这里</li>
-			</ul>
-			<span class="addtask">+</span>
-    	</section>
-    	<section class="story" draggable="true">
-    		<span class="title">正在做</span>
-			<ul class="list">
-				<li draggable="true" id="delete">删除任务</li>
-			</ul>
-			<ul>
-				<li class="toadd">移动到这里</li>
-			</ul>
-			<span class="addtask">+</span>
-    	</section>
-    	<section class="story" draggable="true">
-    		<span class="title">已完成</span>
-			<ul class="list">
-				<li draggable="true" id="list">列表功能</li>
-			</ul>
-			<ul>
-				<li class="toadd">移动到这里</li>
-			</ul>
-			<span class="addtask">+</span>
-    	</section>
-    	-->
+    	<div class="row">
+    		<div class="col12">
+    			<span id="syncStatus">同步状态: 离线</span>&nbsp;&nbsp;&nbsp;<input id="key" placeholder="输入关键字" /><span id="search">搜索</span>|<span id="cancelSearch">取消搜索</span>
+	    		<div id="trash" draggable="true"><img src="../_assets/images/trash-empty.png" width="40px">回收站</div>&nbsp;&nbsp;&nbsp;
+	    		<span id="save">保存到本地</span>&nbsp;&nbsp;&nbsp;
+	    		<span id="load">载入本地数据</span>
+    		</div>
+    	</div>
+    	<div class="row">
+    		<div class="col-9">
+    			<div id="storyboard">
+	    	<!--
+	    	<section class="story" draggable="true">
+	    		<span class="title">想要做</span>
+				<ul class="list">
+					<li draggable="true" class="p_high" id="colorSelector">颜色选择器</li>
+					<li draggable="true" class="p_middle" id="search">搜索任务</li>
+					<li draggable="true" id="editMenu">编辑菜单优化</li>
+					<li draggable="true" id="importData">导入外部文件</li>
+					<li draggable="true" id="sync">同步</li>
+				</ul>
+				<ul>
+					<li class="toadd">移动到这里</li>
+				</ul>
+				<span class="addtask">+</span>
+	    	</section>
+	    	<section class="story" draggable="true">
+	    		<span class="title">正在做</span>
+				<ul class="list">
+					<li draggable="true" id="delete">删除任务</li>
+				</ul>
+				<ul>
+					<li class="toadd">移动到这里</li>
+				</ul>
+				<span class="addtask">+</span>
+	    	</section>
+	    	<section class="story" draggable="true">
+	    		<span class="title">已完成</span>
+				<ul class="list">
+					<li draggable="true" id="list">列表功能</li>
+				</ul>
+				<ul>
+					<li class="toadd">移动到这里</li>
+				</ul>
+				<span class="addtask">+</span>
+	    	</section>
+	    	-->
+		    	<section id="s1" class="story" draggable="true">
+		    		<span class="title">todo</span>
+					<ul class="list">
+						<li draggable="true" id="list1">todo1</li>
+					</ul>
+					<ul>
+						<li class="toadd">移动到这里</li>
+					</ul>
+					<span class="addtask">+</span>
+		    	</section>
+		    	<section id="s2" class="story" draggable="true">
+		    		<span class="title">doning</span>
+					<ul class="list">
+						<li draggable="true" id="list2">doing1</li>
+					</ul>
+					<ul>
+						<li class="toadd">移动到这里</li>
+					</ul>
+					<span class="addtask">+</span>
+		    	</section>
+		    	<section id="s3" class="story" draggable="true">
+		    		<span class="title">done</span>
+					<ul class="list">
+						<li draggable="true" id="list3">done1</li>
+					</ul>
+					<ul>
+						<li class="toadd">移动到这里</li>
+					</ul>
+					<span class="addtask">+</span>
+		    	</section>
+	    	
+    		</div>
+    		</div>
+    		<div id="log" class="col-3">
+    		</div>
+    	</div>
+    	
+    	
     </body>
 </html>
